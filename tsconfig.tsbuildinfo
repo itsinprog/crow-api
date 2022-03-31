@@ -7222,13 +7222,8 @@
         "affectsGlobalScope": false
       },
       "./index.ts": {
-        "version": "50fa61e85114c9e856852cd971a655175f515859ed218bc0affa4ecd8480f4cf",
+        "version": "75052439cf55bafef9e8a34ec3de208665068c3bcfd9f5ea596888c09dd5a960",
         "signature": "3dc607389133e0da2d5abc56e6c5ddcea528fc2509a5954df10190a52fb66a11",
-        "affectsGlobalScope": false
-      },
-      "./types.d.ts": {
-        "version": "bb4c8444b23d9015dd6191f09a1f8e9b553182efff6a844322c54219b2e8fb6d",
-        "signature": "bb4c8444b23d9015dd6191f09a1f8e9b553182efff6a844322c54219b2e8fb6d",
         "affectsGlobalScope": false
       },
       "./lib/crow-api-stack.ts": {
@@ -7361,29 +7356,16 @@
         "signature": "09c4b2e2d3070239d563fc690f0cc5db04a2d9b66a23e61aef8b5274e3e9910c",
         "affectsGlobalScope": false
       },
-      "../node_modules/@types/keyv/index.d.ts": {
-        "version": "82169f198ffdfc787fba368ccfad2b2d8ef3712f3c696df94ac13f6884bbbe2d",
-        "signature": "82169f198ffdfc787fba368ccfad2b2d8ef3712f3c696df94ac13f6884bbbe2d",
+      "../../../node_modules/@types/bn.js/index.d.ts": {
+        "version": "cdac7e46e615e1fdcca7c3a2aab2fbd19085443048733cf239a090f7a17efa27",
         "affectsGlobalScope": false
       },
-      "../node_modules/@types/http-cache-semantics/index.d.ts": {
-        "version": "cab425b5559edac18327eb2c3c0f47e7e9f71b667290b7689faafd28aac69eae",
-        "signature": "cab425b5559edac18327eb2c3c0f47e7e9f71b667290b7689faafd28aac69eae",
+      "../../../node_modules/@types/pbkdf2/index.d.ts": {
+        "version": "a73a445c1e0a6d0f8b48e8eb22dc9d647896783a7f8991cbbc31c0d94bf1f5a2",
         "affectsGlobalScope": false
       },
-      "../node_modules/@types/responselike/index.d.ts": {
-        "version": "3cfb0cb51cc2c2e1b313d7c4df04dbf7e5bda0a133c6b309bf6af77cf614b971",
-        "signature": "3cfb0cb51cc2c2e1b313d7c4df04dbf7e5bda0a133c6b309bf6af77cf614b971",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/cacheable-request/index.d.ts": {
-        "version": "f992cd6cc0bcbaa4e6c810468c90f2d8595f8c6c3cf050c806397d3de8585562",
-        "signature": "f992cd6cc0bcbaa4e6c810468c90f2d8595f8c6c3cf050c806397d3de8585562",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/minimist/index.d.ts": {
-        "version": "209e814e8e71aec74f69686a9506dd7610b97ab59dcee9446266446f72a76d05",
-        "signature": "209e814e8e71aec74f69686a9506dd7610b97ab59dcee9446266446f72a76d05",
+      "../../../node_modules/@types/secp256k1/index.d.ts": {
+        "version": "3dce33e7eb25594863b8e615f14a45ab98190d85953436750644212d8a18c066",
         "affectsGlobalScope": false
       }
     },
@@ -7419,15 +7401,31 @@
       "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
     },
     "referencedMap": {
+      "../../../node_modules/@types/bn.js/index.d.ts": [
+        "./node_modules/@types/node/ts3.2/util.d.ts",
+        "./node_modules/@types/node/ts3.7/index.d.ts",
+        "./node_modules/@types/node/util.d.ts"
+      ],
+      "../../../node_modules/@types/pbkdf2/index.d.ts": [
+        "./node_modules/@types/node/ts3.2/util.d.ts",
+        "./node_modules/@types/node/ts3.7/index.d.ts",
+        "./node_modules/@types/node/util.d.ts"
+      ],
+      "../../../node_modules/@types/secp256k1/index.d.ts": [
+        "./node_modules/@types/node/ts3.2/util.d.ts",
+        "./node_modules/@types/node/ts3.7/index.d.ts",
+        "./node_modules/@types/node/util.d.ts"
+      ],
       "./index.ts": [
+        "./node_modules/@types/fs-extra/index.d.ts",
         "./node_modules/@types/node/ts3.2/util.d.ts",
         "./node_modules/@types/node/util.d.ts",
         "./node_modules/aws-cdk-lib/aws-apigateway/index.d.ts",
+        "./node_modules/aws-cdk-lib/aws-lambda-nodejs/index.d.ts",
         "./node_modules/aws-cdk-lib/aws-lambda/index.d.ts",
         "./node_modules/aws-cdk-lib/aws-logs/index.d.ts",
         "./node_modules/aws-cdk-lib/index.d.ts",
-        "./node_modules/constructs/lib/index.d.ts",
-        "./types.d.ts"
+        "./node_modules/constructs/lib/index.d.ts"
       ],
       "./lib/crow-api-stack.ts": [
         "./index.ts",
@@ -17917,42 +17915,6 @@
         "./node_modules/aws-cdk-lib/aws-lambda/index.d.ts",
         "./node_modules/aws-cdk-lib/aws-logs/index.d.ts",
         "./node_modules/aws-cdk-lib/index.d.ts"
-      ],
-      "./types.d.ts": [
-        "./node_modules/@types/node/ts3.2/util.d.ts",
-        "./node_modules/@types/node/util.d.ts"
-      ],
-      "../node_modules/@types/cacheable-request/index.d.ts": [
-        "../node_modules/@types/http-cache-semantics/index.d.ts",
-        "../node_modules/@types/keyv/index.d.ts",
-        "../node_modules/@types/responselike/index.d.ts",
-        "./node_modules/@types/node/events.d.ts",
-        "./node_modules/@types/node/http.d.ts",
-        "./node_modules/@types/node/ts3.2/util.d.ts",
-        "./node_modules/@types/node/ts3.7/index.d.ts",
-        "./node_modules/@types/node/url.d.ts",
-        "./node_modules/@types/node/util.d.ts"
-      ],
-      "../node_modules/@types/http-cache-semantics/index.d.ts": [
-        "./node_modules/@types/node/ts3.2/util.d.ts",
-        "./node_modules/@types/node/util.d.ts"
-      ],
-      "../node_modules/@types/keyv/index.d.ts": [
-        "./node_modules/@types/node/events.d.ts",
-        "./node_modules/@types/node/ts3.2/util.d.ts",
-        "./node_modules/@types/node/ts3.7/index.d.ts",
-        "./node_modules/@types/node/util.d.ts"
-      ],
-      "../node_modules/@types/minimist/index.d.ts": [
-        "./node_modules/@types/node/ts3.2/util.d.ts",
-        "./node_modules/@types/node/util.d.ts"
-      ],
-      "../node_modules/@types/responselike/index.d.ts": [
-        "./node_modules/@types/node/http.d.ts",
-        "./node_modules/@types/node/stream.d.ts",
-        "./node_modules/@types/node/ts3.2/util.d.ts",
-        "./node_modules/@types/node/ts3.7/index.d.ts",
-        "./node_modules/@types/node/util.d.ts"
       ]
     },
     "exportedModulesMap": {
@@ -28438,42 +28400,6 @@
       "./node_modules/typescript/lib/lib.esnext.intl.d.ts": [
         "./node_modules/@types/node/ts3.2/util.d.ts",
         "./node_modules/@types/node/util.d.ts"
-      ],
-      "./types.d.ts": [
-        "./node_modules/@types/node/ts3.2/util.d.ts",
-        "./node_modules/@types/node/util.d.ts"
-      ],
-      "../node_modules/@types/cacheable-request/index.d.ts": [
-        "../node_modules/@types/http-cache-semantics/index.d.ts",
-        "../node_modules/@types/keyv/index.d.ts",
-        "../node_modules/@types/responselike/index.d.ts",
-        "./node_modules/@types/node/events.d.ts",
-        "./node_modules/@types/node/http.d.ts",
-        "./node_modules/@types/node/ts3.2/util.d.ts",
-        "./node_modules/@types/node/ts3.7/index.d.ts",
-        "./node_modules/@types/node/url.d.ts",
-        "./node_modules/@types/node/util.d.ts"
-      ],
-      "../node_modules/@types/http-cache-semantics/index.d.ts": [
-        "./node_modules/@types/node/ts3.2/util.d.ts",
-        "./node_modules/@types/node/util.d.ts"
-      ],
-      "../node_modules/@types/keyv/index.d.ts": [
-        "./node_modules/@types/node/events.d.ts",
-        "./node_modules/@types/node/ts3.2/util.d.ts",
-        "./node_modules/@types/node/ts3.7/index.d.ts",
-        "./node_modules/@types/node/util.d.ts"
-      ],
-      "../node_modules/@types/minimist/index.d.ts": [
-        "./node_modules/@types/node/ts3.2/util.d.ts",
-        "./node_modules/@types/node/util.d.ts"
-      ],
-      "../node_modules/@types/responselike/index.d.ts": [
-        "./node_modules/@types/node/http.d.ts",
-        "./node_modules/@types/node/stream.d.ts",
-        "./node_modules/@types/node/ts3.2/util.d.ts",
-        "./node_modules/@types/node/ts3.7/index.d.ts",
-        "./node_modules/@types/node/util.d.ts"
       ]
     },
     "semanticDiagnosticsPerFile": [
@@ -29946,13 +29872,7 @@
       "./node_modules/typescript/lib/lib.es2020.bigint.d.ts",
       "./node_modules/typescript/lib/lib.es5.d.ts",
       "./node_modules/typescript/lib/lib.esnext.intl.d.ts",
-      "./test/crow-api.test.ts",
-      "./types.d.ts",
-      "../node_modules/@types/cacheable-request/index.d.ts",
-      "../node_modules/@types/http-cache-semantics/index.d.ts",
-      "../node_modules/@types/keyv/index.d.ts",
-      "../node_modules/@types/minimist/index.d.ts",
-      "../node_modules/@types/responselike/index.d.ts"
+      "./test/crow-api.test.ts"
     ]
   },
   "version": "3.9.10"

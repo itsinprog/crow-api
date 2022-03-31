@@ -1,113 +1,114 @@
-import * as cdk from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as apigateway from 'aws-cdk-lib/aws-apigateway';
-import * as logs from 'aws-cdk-lib/aws-logs';
+import * as cdk from "aws-cdk-lib";
+import { Construct } from "constructs";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as node_lambda from "aws-cdk-lib/aws-lambda-nodejs";
+import * as apigateway from "aws-cdk-lib/aws-apigateway";
+import * as logs from "aws-cdk-lib/aws-logs";
 
 /**
  * For copying shared code to all paths
  */
-import * as fse from 'fs-extra';
+import * as fse from "fs-extra";
 
 export interface LambdasByPath {
-  [path: string]: lambda.Function,
+  [path: string]: node_lambda.NodejsFunction;
 }
 
 export interface CrowLambdaConfigurations {
-  [lambdaByPath: string]: lambda.FunctionProps,
+  [lambdaByPath: string]: node_lambda.NodejsFunctionProps;
 }
 
 // Same as ModelOptions but modelName is required (used as ID)
 export interface CrowModelOptions {
-  readonly schema: apigateway.JsonSchema,
-  readonly modelName: string,
-  readonly contentType?: string,
-  readonly description?: string,
+  readonly schema: apigateway.JsonSchema;
+  readonly modelName: string;
+  readonly contentType?: string;
+  readonly description?: string;
 }
 
 // Same as RequestValidatorOptions but requestValidatorName is required (used as ID)
 export interface CrowRequestValidatorOptions {
-  readonly requestValidatorName: string,
-  readonly validateRequestBody?: boolean,
-  readonly validateRequestParameters?: boolean,
+  readonly requestValidatorName: string;
+  readonly validateRequestBody?: boolean;
+  readonly validateRequestParameters?: boolean;
 }
 
 export interface CrowMethodResponse {
-  readonly statusCode: string,
+  readonly statusCode: string;
   // Takes a string which is matched with the modelName
-  readonly responseModels?: { [contentType: string]: string },
-  readonly responseParameters?: { [param: string]: boolean }
+  readonly responseModels?: { [contentType: string]: string };
+  readonly responseParameters?: { [param: string]: boolean };
 }
 
 export interface CrowMethodConfiguration {
   // Redefining MethodOptions since Omit is not supported
-  readonly apiKeyRequired?: boolean,
-  readonly authorizationScopes?: string[],
-  readonly authorizationType?: apigateway.AuthorizationType,
-  readonly authorizer?: apigateway.IAuthorizer,
-  readonly methodResponses?: CrowMethodResponse[],
-  readonly operationName?: string,
+  readonly apiKeyRequired?: boolean;
+  readonly authorizationScopes?: string[];
+  readonly authorizationType?: apigateway.AuthorizationType;
+  readonly authorizer?: apigateway.IAuthorizer;
+  readonly methodResponses?: CrowMethodResponse[];
+  readonly operationName?: string;
   // Takes a string which is matched with the modelName
-  readonly requestModels?: { [contentType: string]: string },
-  readonly requestParameters?: { [param: string]: boolean },
+  readonly requestModels?: { [contentType: string]: string };
+  readonly requestParameters?: { [param: string]: boolean };
   // Takes a string which is matched with the requestValidatorName
-  readonly requestValidator?: string,
-  readonly requestValidatorOptions?: apigateway.RequestValidatorOptions,
-  readonly useAuthorizerLambda?: boolean,
+  readonly requestValidator?: string;
+  readonly requestValidatorOptions?: apigateway.RequestValidatorOptions;
+  readonly useAuthorizerLambda?: boolean;
 }
 
 export interface CrowMethodConfigurations {
-  // methodByPath should be lambda.FunctionProps
+  // methodByPath should be lambda.NodejsFunctionProps
   // without anything required
   // but jsii does not allow for Omit type
-  [methodByPath: string]: CrowMethodConfiguration,
+  [methodByPath: string]: CrowMethodConfiguration;
 }
 
 export interface CrowApiProps {
-  readonly sourceDirectory?: string,
-  readonly sharedDirectory?: string,
-  readonly useAuthorizerLambda?: boolean,
-  readonly authorizerDirectory?: string,
-  // authorizerLambdaConfiguration should be lambda.FunctionProps
+  readonly sourceDirectory?: string;
+  readonly sharedDirectory?: string;
+  readonly useAuthorizerLambda?: boolean;
+  readonly authorizerDirectory?: string;
+  // authorizerLambdaConfiguration should be lambda.NodejsFunctionProps
   // without anything required
   // but jsii does not allow for Omit type
-  readonly authorizerLambdaConfiguration?: lambda.FunctionProps | any,
+  readonly authorizerLambdaConfiguration?: node_lambda.NodejsFunctionProps | any;
   // authorizerConfiguration should be apigateway.TokenAuthorizerProps
   // without anything required
   // but jsii does not allow for Omit type
-  readonly tokenAuthorizerConfiguration?: apigateway.TokenAuthorizerProps | any,
-  readonly createApiKey?: boolean,
-  readonly logRetention?: logs.RetentionDays,
+  readonly tokenAuthorizerConfiguration?: apigateway.TokenAuthorizerProps | any;
+  readonly createApiKey?: boolean;
+  readonly logRetention?: logs.RetentionDays;
   // apiGatwayConfiguration should be apigateway.LambdaRestApiProps
   // without anything required
   // but jsii does not allow for Omit type
-  readonly apiGatewayConfiguration?: apigateway.RestApiProps | any,
-  readonly apiGatewayName?: string,
-  readonly lambdaConfigurations?: CrowLambdaConfigurations,
+  readonly apiGatewayConfiguration?: apigateway.RestApiProps | any;
+  readonly apiGatewayName?: string;
+  readonly lambdaConfigurations?: CrowLambdaConfigurations;
   readonly lambdaIntegrationOptions?: {
-    [lambdaPath: string]: apigateway.LambdaIntegrationOptions,
-  }
-  readonly models?: CrowModelOptions[],
-  readonly requestValidators?: CrowRequestValidatorOptions[],
-  readonly methodConfigurations?: CrowMethodConfigurations,
+    [lambdaPath: string]: apigateway.LambdaIntegrationOptions;
+  };
+  readonly models?: CrowModelOptions[];
+  readonly requestValidators?: CrowRequestValidatorOptions[];
+  readonly methodConfigurations?: CrowMethodConfigurations;
 }
 
 interface FSGraphNode {
-  resource: apigateway.IResource,
-  path: string,
-  paths: string[],
-  verbs: string[],
+  resource: apigateway.IResource;
+  path: string;
+  paths: string[];
+  verbs: string[];
 }
 
 interface FSGraph {
-  [path: string]: FSGraphNode,
+  [path: string]: FSGraphNode;
 }
 
 export class CrowApi extends Construct {
   public gateway!: apigateway.RestApi;
   public usagePlan!: apigateway.UsagePlan;
   public authorizer!: apigateway.IAuthorizer;
-  public authorizerLambda!: lambda.Function;
+  public authorizerLambda!: node_lambda.NodejsFunction;
   public lambdaLayer!: lambda.LayerVersion | undefined;
   public lambdaFunctions!: LambdasByPath;
   public models!: { [modelName: string]: apigateway.IModel };
@@ -124,66 +125,89 @@ export class CrowApi extends Construct {
 
     // Pulling out props
     const {
-      sourceDirectory = 'src',
-      sharedDirectory = 'shared',
+      sourceDirectory = "src",
+      sharedDirectory = "shared",
       useAuthorizerLambda = false,
-      authorizerDirectory = 'authorizer',
+      authorizerDirectory = "authorizer",
       authorizerLambdaConfiguration = {},
       tokenAuthorizerConfiguration = {},
       createApiKey = false,
       logRetention = logs.RetentionDays.ONE_WEEK,
       apiGatewayConfiguration = {},
-      apiGatewayName = 'crow-api',
+      apiGatewayName = "crow-api",
       lambdaConfigurations = {},
       lambdaIntegrationOptions = {},
       models = [],
       requestValidators = [],
-      methodConfigurations = {},
+      methodConfigurations = {}
     } = props;
 
     // Initializing constants
     const LAMBDA_RUNTIME = lambda.Runtime.NODEJS_14_X;
-    const SPECIAL_DIRECTORIES = [
-      sharedDirectory,
-      authorizerDirectory,
-    ];
+    const SPECIAL_DIRECTORIES = [sharedDirectory, authorizerDirectory];
 
     // Helpers functions for constructor
 
     // Prepares default Lambda props and overrides them with user input
     function bundleLambdaProps(
       codePath: string,
-      userConfiguration: lambda.FunctionProps,
-      sharedLayer: lambda.LayerVersion | undefined,
+      userConfiguration: node_lambda.NodejsFunctionProps,
+      sharedLayer: lambda.LayerVersion | undefined
     ) {
       let layers;
       if (sharedLayer) {
-        const {
-          layers: userLayers = [],
-        } = userConfiguration;
+        const { layers: userLayers = [] } = userConfiguration;
         layers = [sharedLayer, ...userLayers];
       }
 
       const defaultProps = {
         runtime: LAMBDA_RUNTIME,
         code: lambda.Code.fromAsset(codePath),
-        handler: 'index.handler',
-        logRetention,
+        entry: `${codePath}/index.js`,
+        handler: "handler",
+        logRetention
       };
 
       const lambdaProps = {
         ...defaultProps,
         ...userConfiguration, // Let user configuration override anything except layers
-        layers,
-      }
+        layers
+      };
 
       return lambdaProps;
+    }
+
+    function getLambdaConfig(newApiPath: string) {
+      // if direct match return right away
+      if (lambdaConfigurations[newApiPath]) {
+        return lambdaConfigurations[newApiPath];
+      }
+
+      // check all route wild card options for matching configs
+      let baseRoute: string = "";
+      const match: string | undefined = newApiPath
+        .split("/")
+        .map((segment) => {
+          if (segment) {
+            baseRoute += !baseRoute ? `/${segment}` : `${segment}`;
+          }
+          return `${baseRoute}/*`;
+        })
+        .find((wildcard) => !!lambdaConfigurations[wildcard]);
+
+      if (match) {
+        return lambdaConfigurations[match];
+      }
+
+      // returns empty config
+      return {};
     }
 
     // Returns child directories given the path of a parent
     function getDirectoryChildren(parentDirectory: string) {
       try {
-        const directories = fse.readdirSync(parentDirectory, { withFileTypes: true })
+        const directories = fse
+          .readdirSync(parentDirectory, { withFileTypes: true })
           .filter((dirent: any) => dirent.isDirectory())
           .map((dirent: any) => dirent.name);
         return directories;
@@ -199,8 +223,8 @@ export class CrowApi extends Construct {
     }
 
     // API Gateway log group
-    const gatewayLogGroup = new logs.LogGroup(this, 'api-access-logs', {
-      retention: logs.RetentionDays.ONE_WEEK,
+    const gatewayLogGroup = new logs.LogGroup(this, "api-access-logs", {
+      retention: logs.RetentionDays.ONE_WEEK
     });
 
     // The API Gateway itself
@@ -208,10 +232,10 @@ export class CrowApi extends Construct {
       deploy: true,
       deployOptions: {
         loggingLevel: apigateway.MethodLoggingLevel.ERROR,
-        accessLogDestination: new apigateway.LogGroupLogDestination(gatewayLogGroup),
+        accessLogDestination: new apigateway.LogGroupLogDestination(gatewayLogGroup)
       },
       apiKeySourceType: createApiKey ? apigateway.ApiKeySourceType.HEADER : undefined,
-      ...apiGatewayConfiguration,
+      ...apiGatewayConfiguration
     });
 
     const createdModels: { [modelName: string]: apigateway.IModel } = {};
@@ -222,23 +246,26 @@ export class CrowApi extends Construct {
     const createdRequestValidators: { [requestValidatorsName: string]: apigateway.IRequestValidator } = {};
     requestValidators.forEach((requestValidator: CrowRequestValidatorOptions) => {
       // requestValidatorName is used as ID and can now be used for referencing model in method options
-      createdRequestValidators[requestValidator.requestValidatorName] = gateway.addRequestValidator(requestValidator.requestValidatorName, requestValidator);
+      createdRequestValidators[requestValidator.requestValidatorName] = gateway.addRequestValidator(
+        requestValidator.requestValidatorName,
+        requestValidator
+      );
     });
 
     // Create API key if desired
     if (createApiKey) {
-      const apiKey = gateway.addApiKey('api-key');
-      const usagePlan = new apigateway.UsagePlan(this, 'usage-plan', {
+      const apiKey = gateway.addApiKey("api-key");
+      const usagePlan = new apigateway.UsagePlan(this, "usage-plan", {
         throttle: {
           burstLimit: 5000,
-          rateLimit: 10000,
+          rateLimit: 10000
         },
         apiStages: [
           {
             api: gateway,
-            stage: gateway.deploymentStage,
-          },
-        ],
+            stage: gateway.deploymentStage
+          }
+        ]
       });
       usagePlan.addApiKey(apiKey);
       this.usagePlan = usagePlan;
@@ -248,10 +275,10 @@ export class CrowApi extends Construct {
     const sourceSharedDirectory = `${sourceDirectory}/${sharedDirectory}`;
     let sharedLayer: lambda.LayerVersion | undefined;
     if (fse.existsSync(sourceSharedDirectory)) {
-      sharedLayer = new lambda.LayerVersion(this, 'shared-layer', {
+      sharedLayer = new lambda.LayerVersion(this, "shared-layer", {
         code: lambda.Code.fromAsset(sourceSharedDirectory),
         compatibleRuntimes: [LAMBDA_RUNTIME],
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        removalPolicy: cdk.RemovalPolicy.DESTROY
       });
 
       this.lambdaLayer = sharedLayer;
@@ -262,44 +289,44 @@ export class CrowApi extends Construct {
     if (useAuthorizerLambda) {
       const fullAuthorizerDirectory = `${sourceDirectory}/${authorizerDirectory}`;
 
-      const authorizerLambdaProps = bundleLambdaProps(fullAuthorizerDirectory, authorizerLambdaConfiguration, sharedLayer);
+      const authorizerLambdaProps = bundleLambdaProps(
+        fullAuthorizerDirectory,
+        authorizerLambdaConfiguration,
+        sharedLayer
+      );
 
-      const authorizerLambda = new lambda.Function(this, 'authorizer-lambda', authorizerLambdaProps);
+      const authorizerLambda = new node_lambda.NodejsFunction(this, "authorizer-lambda", authorizerLambdaProps);
       this.authorizerLambda = authorizerLambda;
 
       const bundledTokenAuthConfig = {
         handler: authorizerLambda,
         resultsCacheTtl: cdk.Duration.seconds(3600),
-        ...tokenAuthorizerConfiguration,
+        ...tokenAuthorizerConfiguration
       };
-      tokenAuthorizer = new apigateway.TokenAuthorizer(
-        this,
-        'token-authorizer',
-        bundledTokenAuthConfig
-      );
+      tokenAuthorizer = new apigateway.TokenAuthorizer(this, "token-authorizer", bundledTokenAuthConfig);
       this.authorizer = tokenAuthorizer;
     }
 
     // Time to start walking the directories
     const root = sourceDirectory;
-    const verbs = ['get', 'post', 'put', 'delete'];
+    const verbs = ["get", "post", "put", "delete"];
     const graph: FSGraph = {};
     const lambdasByPath: LambdasByPath = {};
 
     // Initialize with root
-    graph['/'] = {
+    graph["/"] = {
       resource: gateway.root,
       path: root,
       paths: [],
-      verbs: [],
+      verbs: []
     };
     // First element in tuple is directory path, second is API path
-    const nodes: [string, string][] = [[root, '/']];
+    const nodes: [string, string][] = [[root, "/"]];
 
     // BFS that creates API Gateway structure using addMethod
     while (nodes.length) {
       // The `|| ['type', 'script']` piece is needed or TS throws a fit
-      const [directoryPath, apiPath] = nodes.shift() || ['type', 'script'];
+      const [directoryPath, apiPath] = nodes.shift() || ["type", "script"];
       const children: any[] = getDirectoryChildren(directoryPath);
 
       // For debugging purposes
@@ -309,27 +336,17 @@ export class CrowApi extends Construct {
       // since this is a file structure
       // ...unless there are symlinks? Haven't run into that
       children.forEach((child) => {
-
         const newDirectoryPath = `${directoryPath}/${child}`;
         // If we're on the root path, don't separate with a slash (/)
         //   because it ends up looking like //child-path
-        const newApiPath = apiPath === '/' ? `/${child}` : `${apiPath}/${child}`;
+        const newApiPath = apiPath === "/" ? `/${child}` : `${apiPath}/${child}`;
 
         if (verbs.includes(child)) {
           // If directory is a verb, we don't traverse it anymore
           //   and need to create an API Gateway method and Lambda
-          const userLambdaConfiguration = lambdaConfigurations[newApiPath]
-            || {};
-          const lambdaProps = bundleLambdaProps(
-            newDirectoryPath,
-            userLambdaConfiguration,
-            sharedLayer,
-          );
-          const newLambda = new lambda.Function(
-            this,
-            newDirectoryPath,
-            lambdaProps,
-          );
+          const userLambdaConfiguration = getLambdaConfig(newApiPath);
+          const lambdaProps = bundleLambdaProps(newDirectoryPath, userLambdaConfiguration, sharedLayer);
+          const newLambda = new node_lambda.NodejsFunction(this, newDirectoryPath, lambdaProps);
 
           // Pull out useAuthorizerLambda value and the tweaked model values
           const {
@@ -340,7 +357,7 @@ export class CrowApi extends Construct {
             ...userMethodConfiguration
           } = methodConfigurations[newApiPath] || {};
           let bundledMethodConfiguration: any = {
-            ...userMethodConfiguration,
+            ...userMethodConfiguration
           };
 
           // Map models
@@ -362,21 +379,17 @@ export class CrowApi extends Construct {
                 });
               }
 
-              const {
-                statusCode,
-                responseParameters,
-              } = crowMethodResponse;
+              const { statusCode, responseParameters } = crowMethodResponse;
               methodResponses.push({
                 statusCode,
                 responseParameters,
-                responseModels,
+                responseModels
               });
-            })
+            });
           }
 
           // Find request validator
-          if (requestValidatorString
-            && createdRequestValidators[requestValidatorString]) {
+          if (requestValidatorString && createdRequestValidators[requestValidatorString]) {
             bundledMethodConfiguration.requestValidator = createdRequestValidators[requestValidatorString];
           }
 
@@ -393,11 +406,10 @@ export class CrowApi extends Construct {
           graph[apiPath].resource.addMethod(
             child.toUpperCase(),
             new apigateway.LambdaIntegration(newLambda, integrationOptions),
-            bundledMethodConfiguration,
+            bundledMethodConfiguration
           );
           graph[apiPath].verbs.push(child);
           lambdasByPath[newApiPath] = newLambda;
-
         } else if (SPECIAL_DIRECTORIES.includes(child)) {
           // The special directories should not result in an API path
           // This means the API also cannot have a resource with the
@@ -406,8 +418,7 @@ export class CrowApi extends Construct {
           // If directory is not a verb, create new API Gateway resource
           //   for use by verb directory later
 
-          const newResource = graph[apiPath].resource
-            .resourceForPath(child);
+          const newResource = graph[apiPath].resource.resourceForPath(child);
 
           nodes.push([newDirectoryPath, newApiPath]);
 
@@ -419,9 +430,8 @@ export class CrowApi extends Construct {
             resource: newResource,
             path: newDirectoryPath,
             paths: [],
-            verbs: [],
+            verbs: []
           };
-
         }
       });
     }
