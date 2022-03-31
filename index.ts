@@ -189,7 +189,7 @@ export class CrowApi extends Construct {
         .split("/")
         .map((segment) => {
           if (segment) {
-            baseRoute += !baseRoute ? `/${segment}` : `${segment}`;
+            baseRoute += `/${segment}`;
           }
           return `${baseRoute}/*`;
         })
