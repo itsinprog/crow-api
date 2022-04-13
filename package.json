@@ -53,15 +53,14 @@
   },
   "dependencies": {
     "fs-extra": "^10.0.0",
-    "source-map-support": "^0.5.16",
-    "aws-cdk-lib": "2.20.0"
+    "source-map-support": "^0.5.16"
   },
   "bundledDependencies": [
     "fs-extra",
     "source-map-support"
   ],
   "peerDependencies": {
-    "aws-cdk-lib": "^2.1.0",
+    "aws-cdk-lib": "^2.20.0",
     "constructs": "^10.0.9"
   },
   "stability": "experimental",
