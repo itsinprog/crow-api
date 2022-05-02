@@ -9,6 +9,7 @@ import * as logs from "aws-cdk-lib/aws-logs";
  * For copying shared code to all paths
  */
 import * as fse from "fs-extra";
+import { CorsOptions } from "aws-cdk-lib/aws-apigateway";
 
 export interface LambdasByPath {
   [path: string]: node_lambda.NodejsFunction;
@@ -72,13 +73,16 @@ export interface CrowApiProps {
   // authorizerLambdaConfiguration should be lambda.NodejsFunctionProps
   // without anything required
   // but jsii does not allow for Omit type
-  readonly authorizerLambdaConfiguration?: node_lambda.NodejsFunctionProps | any;
+  readonly authorizerLambdaConfiguration?:
+    | node_lambda.NodejsFunctionProps
+    | any;
   // authorizerConfiguration should be apigateway.TokenAuthorizerProps
   // without anything required
   // but jsii does not allow for Omit type
   readonly tokenAuthorizerConfiguration?: apigateway.TokenAuthorizerProps | any;
   readonly createApiKey?: boolean;
   readonly logRetention?: logs.RetentionDays;
+  readonly corsOptions?: CorsOptions;
   // apiGatwayConfiguration should be apigateway.LambdaRestApiProps
   // without anything required
   // but jsii does not allow for Omit type
@@ -112,7 +116,9 @@ export class CrowApi extends Construct {
   public lambdaLayer!: lambda.LayerVersion | undefined;
   public lambdaFunctions!: LambdasByPath;
   public models!: { [modelName: string]: apigateway.IModel };
-  public requestValidators!: { [requestValidatorsName: string]: apigateway.IRequestValidator };
+  public requestValidators!: {
+    [requestValidatorsName: string]: apigateway.IRequestValidator;
+  };
 
   /**
    *
@@ -139,7 +145,8 @@ export class CrowApi extends Construct {
       lambdaIntegrationOptions = {},
       models = [],
       requestValidators = [],
-      methodConfigurations = {}
+      methodConfigurations = {},
+      corsOptions = null
     } = props;
 
     // Initializing constants
@@ -232,9 +239,14 @@ export class CrowApi extends Construct {
       deploy: true,
       deployOptions: {
         loggingLevel: apigateway.MethodLoggingLevel.ERROR,
-        accessLogDestination: new apigateway.LogGroupLogDestination(gatewayLogGroup)
+        accessLogDestination: new apigateway.LogGroupLogDestination(
+          gatewayLogGroup
+        )
       },
-      apiKeySourceType: createApiKey ? apigateway.ApiKeySourceType.HEADER : undefined,
+      apiKeySourceType: createApiKey
+        ? apigateway.ApiKeySourceType.HEADER
+        : undefined,
+      defaultCorsPreflightOptions: corsOptions ? corsOptions : undefined,
       ...apiGatewayConfiguration
     });
 
@@ -243,14 +255,19 @@ export class CrowApi extends Construct {
       // modelName is used as ID and can now be used for referencing model in method options
       createdModels[model.modelName] = gateway.addModel(model.modelName, model);
     });
-    const createdRequestValidators: { [requestValidatorsName: string]: apigateway.IRequestValidator } = {};
-    requestValidators.forEach((requestValidator: CrowRequestValidatorOptions) => {
-      // requestValidatorName is used as ID and can now be used for referencing model in method options
-      createdRequestValidators[requestValidator.requestValidatorName] = gateway.addRequestValidator(
-        requestValidator.requestValidatorName,
-        requestValidator
-      );
-    });
+    const createdRequestValidators: {
+      [requestValidatorsName: string]: apigateway.IRequestValidator;
+    } = {};
+    requestValidators.forEach(
+      (requestValidator: CrowRequestValidatorOptions) => {
+        // requestValidatorName is used as ID and can now be used for referencing model in method options
+        createdRequestValidators[requestValidator.requestValidatorName] =
+          gateway.addRequestValidator(
+            requestValidator.requestValidatorName,
+            requestValidator
+          );
+      }
+    );
 
     // Create API key if desired
     if (createApiKey) {
@@ -295,7 +312,11 @@ export class CrowApi extends Construct {
         sharedLayer
       );
 
-      const authorizerLambda = new node_lambda.NodejsFunction(this, "authorizer-lambda", authorizerLambdaProps);
+      const authorizerLambda = new node_lambda.NodejsFunction(
+        this,
+        "authorizer-lambda",
+        authorizerLambdaProps
+      );
       this.authorizerLambda = authorizerLambda;
 
       const bundledTokenAuthConfig = {
@@ -303,7 +324,11 @@ export class CrowApi extends Construct {
         resultsCacheTtl: cdk.Duration.seconds(3600),
         ...tokenAuthorizerConfiguration
       };
-      tokenAuthorizer = new apigateway.TokenAuthorizer(this, "token-authorizer", bundledTokenAuthConfig);
+      tokenAuthorizer = new apigateway.TokenAuthorizer(
+        this,
+        "token-authorizer",
+        bundledTokenAuthConfig
+      );
       this.authorizer = tokenAuthorizer;
     }
 
@@ -339,14 +364,23 @@ export class CrowApi extends Construct {
         const newDirectoryPath = `${directoryPath}/${child}`;
         // If we're on the root path, don't separate with a slash (/)
         //   because it ends up looking like //child-path
-        const newApiPath = apiPath === "/" ? `/${child}` : `${apiPath}/${child}`;
+        const newApiPath =
+          apiPath === "/" ? `/${child}` : `${apiPath}/${child}`;
 
         if (verbs.includes(child)) {
           // If directory is a verb, we don't traverse it anymore
           //   and need to create an API Gateway method and Lambda
           const userLambdaConfiguration = getLambdaConfig(newApiPath);
-          const lambdaProps = bundleLambdaProps(newDirectoryPath, userLambdaConfiguration, sharedLayer);
-          const newLambda = new node_lambda.NodejsFunction(this, newDirectoryPath, lambdaProps);
+          const lambdaProps = bundleLambdaProps(
+            newDirectoryPath,
+            userLambdaConfiguration,
+            sharedLayer
+          );
+          const newLambda = new node_lambda.NodejsFunction(
+            this,
+            newDirectoryPath,
+            lambdaProps
+          );
 
           // Pull out useAuthorizerLambda value and the tweaked model values
           const {
@@ -361,22 +395,29 @@ export class CrowApi extends Construct {
           };
 
           // Map models
-          const requestModels: { [contentType: string]: apigateway.IModel } = {};
+          const requestModels: { [contentType: string]: apigateway.IModel } =
+            {};
           if (crowRequestModels) {
-            Object.entries(crowRequestModels).forEach(([contentType, modelName]) => {
-              requestModels[contentType] = createdModels[modelName];
-            });
+            Object.entries(crowRequestModels).forEach(
+              ([contentType, modelName]) => {
+                requestModels[contentType] = createdModels[modelName];
+              }
+            );
           }
 
           const methodResponses: apigateway.MethodResponse[] = [];
           if (crowMethodResponses && crowMethodResponses.length > 0) {
             crowMethodResponses.forEach((crowMethodResponse) => {
-              const responseModels: { [contentType: string]: apigateway.IModel } = {};
+              const responseModels: {
+                [contentType: string]: apigateway.IModel;
+              } = {};
               if (crowMethodResponse.responseModels) {
                 const crowResponseModels = crowMethodResponse.responseModels;
-                Object.entries(crowResponseModels).forEach(([contentType, modelName]) => {
-                  responseModels[contentType] = createdModels[modelName];
-                });
+                Object.entries(crowResponseModels).forEach(
+                  ([contentType, modelName]) => {
+                    responseModels[contentType] = createdModels[modelName];
+                  }
+                );
               }
 
               const { statusCode, responseParameters } = crowMethodResponse;
@@ -389,8 +430,12 @@ export class CrowApi extends Construct {
           }
 
           // Find request validator
-          if (requestValidatorString && createdRequestValidators[requestValidatorString]) {
-            bundledMethodConfiguration.requestValidator = createdRequestValidators[requestValidatorString];
+          if (
+            requestValidatorString &&
+            createdRequestValidators[requestValidatorString]
+          ) {
+            bundledMethodConfiguration.requestValidator =
+              createdRequestValidators[requestValidatorString];
           }
 
           bundledMethodConfiguration.requestModels = requestModels;
@@ -398,7 +443,8 @@ export class CrowApi extends Construct {
           // If this method should be behind an authorizer Lambda
           //   construct the methodConfiguration object as such
           if (authorizerLambdaConfigured && useAuthorizerLambda) {
-            bundledMethodConfiguration.authorizationType = apigateway.AuthorizationType.CUSTOM;
+            bundledMethodConfiguration.authorizationType =
+              apigateway.AuthorizationType.CUSTOM;
             bundledMethodConfiguration.authorizer = tokenAuthorizer;
           }
 
@@ -408,6 +454,9 @@ export class CrowApi extends Construct {
             new apigateway.LambdaIntegration(newLambda, integrationOptions),
             bundledMethodConfiguration
           );
+          if (corsOptions) {
+            graph[apiPath].resource.addCorsPreflight(corsOptions);
+          }
           graph[apiPath].verbs.push(child);
           lambdasByPath[newApiPath] = newLambda;
         } else if (SPECIAL_DIRECTORIES.includes(child)) {
