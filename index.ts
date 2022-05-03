@@ -10,6 +10,7 @@ import * as logs from "aws-cdk-lib/aws-logs";
  */
 import * as fse from "fs-extra";
 import { CorsOptions } from "aws-cdk-lib/aws-apigateway";
+import { NodejsFunctionProps } from "aws-cdk-lib/aws-lambda-nodejs";
 
 export interface LambdasByPath {
   [path: string]: node_lambda.NodejsFunction;
@@ -184,10 +185,13 @@ export class CrowApi extends Construct {
       return lambdaProps;
     }
 
-    function getLambdaConfig(newApiPath: string) {
+    function getConfig(
+      configurations: CrowMethodConfigurations | CrowLambdaConfigurations,
+      newApiPath: string
+    ): any {
       // if direct match return right away
-      if (lambdaConfigurations[newApiPath]) {
-        return lambdaConfigurations[newApiPath];
+      if (configurations[newApiPath]) {
+        return configurations[newApiPath];
       }
 
       // check all route wild card options for matching configs
@@ -200,10 +204,10 @@ export class CrowApi extends Construct {
           }
           return `${baseRoute}/*`;
         })
-        .find((wildcard) => !!lambdaConfigurations[wildcard]);
+        .find((wildcard) => !!configurations[wildcard]);
 
       if (match) {
-        return lambdaConfigurations[match];
+        return configurations[match];
       }
 
       // returns empty config
@@ -370,7 +374,10 @@ export class CrowApi extends Construct {
         if (verbs.includes(child)) {
           // If directory is a verb, we don't traverse it anymore
           //   and need to create an API Gateway method and Lambda
-          const userLambdaConfiguration = getLambdaConfig(newApiPath);
+          const userLambdaConfiguration: NodejsFunctionProps = getConfig(
+            lambdaConfigurations,
+            newApiPath
+          );
           const lambdaProps = bundleLambdaProps(
             newDirectoryPath,
             userLambdaConfiguration,
@@ -389,7 +396,10 @@ export class CrowApi extends Construct {
             methodResponses: crowMethodResponses,
             requestValidator: requestValidatorString,
             ...userMethodConfiguration
-          } = methodConfigurations[newApiPath] || {};
+          }: CrowMethodConfiguration = getConfig(
+            methodConfigurations,
+            newApiPath
+          );
           let bundledMethodConfiguration: any = {
             ...userMethodConfiguration
           };
