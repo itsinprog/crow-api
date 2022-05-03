@@ -70,6 +70,7 @@ export interface CrowApiProps {
   readonly sourceDirectory?: string;
   readonly sharedDirectory?: string;
   readonly useAuthorizerLambda?: boolean;
+  readonly useAuthorizerLambdaOnAllRoutes?: boolean;
   readonly authorizerDirectory?: string;
   // authorizerLambdaConfiguration should be lambda.NodejsFunctionProps
   // without anything required
@@ -135,6 +136,7 @@ export class CrowApi extends Construct {
       sourceDirectory = "src",
       sharedDirectory = "shared",
       useAuthorizerLambda = false,
+      useAuthorizerLambdaOnAllRoutes = false,
       authorizerDirectory = "authorizer",
       authorizerLambdaConfiguration = {},
       tokenAuthorizerConfiguration = {},
@@ -452,7 +454,10 @@ export class CrowApi extends Construct {
           bundledMethodConfiguration.methodResponses = methodResponses;
           // If this method should be behind an authorizer Lambda
           //   construct the methodConfiguration object as such
-          if (authorizerLambdaConfigured && useAuthorizerLambda) {
+          if (
+            authorizerLambdaConfigured &&
+            (useAuthorizerLambdaOnAllRoutes || useAuthorizerLambda)
+          ) {
             bundledMethodConfiguration.authorizationType =
               apigateway.AuthorizationType.CUSTOM;
             bundledMethodConfiguration.authorizer = tokenAuthorizer;
